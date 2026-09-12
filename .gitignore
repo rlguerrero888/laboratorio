@@ -1,0 +1,37 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.pytest_cache/
+.ruff_cache/
+dist/
+build/
+*.egg-info/
+.eggs/
+.env
+.venv
+venv/
+env/
+
+# PySpark / Java
+derby.log
+metastore_db/
+spark-warehouse/
+
+# macOS
+.DS_Store
+
+# Data directories
+data/raw/
+data/processed/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo

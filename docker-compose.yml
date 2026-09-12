@@ -1,0 +1,79 @@
+services:
+
+  app:
+    build: .
+    environment:
+      BRONZE_PATH: s3a://bronze/transactions
+      SILVER_PATH: s3a://silver/transactions
+      GOLD_PATH: s3a://gold
+      SPARK_MASTER: "local[*]"
+      SPARK_APP_NAME: fintech-platform
+      SPARK_SHUFFLE_PARTITIONS: "4"
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+    volumes:
+      - ./src:/app/src
+      - ./jobs:/app/jobs
+      - ./tests:/app/tests
+      - data-lake:/data
+    depends_on:
+      minio:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+    stdin_open: true
+    tty: true
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"   # S3-compatible API
+      - "9001:9001"   # MinIO web console  →  http://localhost:9001
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - minio-data:/data
+
+  minio-init:
+    image: quay.io/minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      until mc alias set local http://minio:9000 minioadmin minioadmin; do
+        echo 'waiting for MinIO...';
+        sleep 2;
+      done;
+      mc mb --ignore-existing local/bronze;
+      mc mb --ignore-existing local/silver;
+      mc mb --ignore-existing local/gold;
+      echo 'MinIO buckets ready';
+      "
+
+  jupyter:
+    image: jupyter/pyspark-notebook:latest
+    ports:
+      - "8888:8888"   # Notebook UI  →  http://localhost:8888
+    environment:
+      JUPYTER_ENABLE_LAB: "yes"
+      JUPYTER_TOKEN: ""
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+    volumes:
+      - ./Solutions Notebooks:/home/jovyan/work
+      - ./src:/home/jovyan/src
+      - data-lake:/data
+
+volumes:
+  minio-data:
+  data-lake:
