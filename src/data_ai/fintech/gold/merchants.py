@@ -9,7 +9,7 @@ def top_merchants_by_volume(
     Top N merchants by transaction volume, excluding declined transactions.
     Result columns: merchant_id, name, category, total_transactions, total_amount.
     """
-    merchant_ref = merchants_sdf.select("merchant_id", "name", "category")
+    merchant_ref = merchants_sdf.select("merchant_id", "name")
 
     return (
         silver_sdf
