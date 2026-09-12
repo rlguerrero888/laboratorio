@@ -60,12 +60,17 @@ services:
       "
 
   jupyter:
-    image: jupyter/pyspark-notebook:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.jupyter
     ports:
       - "8888:8888"   # Notebook UI  →  http://localhost:8888
     environment:
       JUPYTER_ENABLE_LAB: "yes"
-      JUPYTER_TOKEN: ""
+      JUPYTER_TOKEN: laboratorio-local
+      PYTHONPATH: /home/jovyan/src
+      PYSPARK_PYTHON: python3
+      PYSPARK_DRIVER_PYTHON: python3
       MINIO_ENDPOINT: http://minio:9000
       MINIO_ACCESS_KEY: minioadmin
       MINIO_SECRET_KEY: minioadmin

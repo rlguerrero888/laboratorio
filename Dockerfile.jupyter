@@ -1,0 +1,18 @@
+FROM jupyter/pyspark-notebook:latest
+
+USER root
+
+RUN pip install --no-cache-dir \
+        "pyspark==3.5.0" \
+        "pyarrow>=18.0" \
+    && python -m ipykernel install --sys-prefix \
+        --name pyspark \
+        --display-name "PySpark (Python 3)"
+
+COPY jupyter/spark-defaults.conf /usr/local/spark/conf/spark-defaults.conf
+
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+ENV PYSPARK_PYTHON=python3
+ENV PYSPARK_DRIVER_PYTHON=python3
+
+USER jovyan

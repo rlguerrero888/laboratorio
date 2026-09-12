@@ -35,11 +35,11 @@ def get_spark(app_name: Optional[str] = None) -> SparkSession:
             .config("spark.hadoop.fs.s3a.bucket.create.enabled", "true")
             .config("spark.hadoop.fs.s3a.path.style.access", "true")
             .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
-            .config("spark.hadoop.fs.s3a.connection.timeout", "60000")
-            .config("spark.hadoop.fs.s3a.socket.timeout", "60000")
+            .config("spark.hadoop.fs.s3a.connection.timeout", "60s")
+            .config("spark.hadoop.fs.s3a.socket.timeout", "60s")
             .config(
                 "spark.jars.packages",
-                "org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262",
+                "org.apache.hadoop:hadoop-aws:3.5.0",
             )
         )
 
@@ -47,7 +47,7 @@ def get_spark(app_name: Optional[str] = None) -> SparkSession:
 
     if cfg.s3_endpoint:
         hadoop_conf = spark.sparkContext._jsc.hadoopConfiguration()
-        hadoop_conf.set("fs.s3a.connection.timeout", "60000")
-        hadoop_conf.set("fs.s3a.socket.timeout", "60000")
+        hadoop_conf.set("fs.s3a.connection.timeout", "60s")
+        hadoop_conf.set("fs.s3a.socket.timeout", "60s")
 
     return spark
